@@ -1,28 +1,22 @@
 language: java
-
 branches:
   only:
-    - master
-
+  - master
 before_install:
-  - curl --silent https://shunit2.googlecode.com/files/shunit2-2.1.6.tgz | tar xz -C /tmp/
-  - git clone https://github.com/ryanbrainard/heroku-buildpack-testrunner.git /tmp/testrunner
-  - ./etc/hatchet_travis_setup.sh
-
+- curl --silent https://shunit2.googlecode.com/files/shunit2-2.1.6.tgz | tar xz -C
+  /tmp/
+- git clone https://github.com/ryanbrainard/heroku-buildpack-testrunner.git /tmp/testrunner
+- "./etc/hatchet_travis_setup.sh"
 install: true
-
 script: eval $TEST_CMD
-
-after_script: heroku keys:remove ~/.ssh/id_rsa
-
+after_script: heroku keys:remove $USER@`hostname`
 env:
   global:
-    - IS_RUNNING_ON_TRAVIS=true
-    - HATCHET_RETRIES=3
-    - HATCHET_DEPLOY_STRATEGY=git
-    - HATCHET_BUILDPACK_BASE="https://github.com/heroku/heroku-buildpack-java.git"
-    - SHUNIT_HOME="/tmp/shunit2-2.1.6"
-    - secure: "g66sU88ctjlHwmfFFn/+GfXbPjz2i/iegxkqB6qWIkRISG/S55IWsQe2QMzyC4w6QmtiVsxXBz1YEsUDQPbvfuFzxMU+dFIo6Hwv0IxXYI0qfVvE4xUfG6Dls1pilj1NNFFu4rBbXHN+fr1gwAb1InRj1wPvoauv0h+dbUnvGtY="
+  - HATCHET_RETRIES=3
+  - HATCHET_DEPLOY_STRATEGY=git
+  - HATCHET_BUILDPACK_BASE="https://github.com/heroku/heroku-buildpack-java.git"
+  - SHUNIT_HOME="/tmp/shunit2-2.1.6"
+  - secure: ekfFZDvgv6LUfZJFNfqzC7/22uW8lna0qLzaaIn0G6znN9F+3me2uyj0mzLu067mWn80VfKZnJNbynlBb55y+fqLzxe0XD2Fxxj9Mb5ig/r7THebGS1eFIPNl0/Myfde2ts4LGsTlgXTCPZivHtfu07U7mO6UWuLx/0cTxG+gIo=
   matrix:
-    - TEST_CMD='[ "$TRAVIS_PULL_REQUEST" = "false" ] && mvn verify || true'
-    - TEST_CMD="/tmp/testrunner/bin/run -c ."
+  - TEST_CMD='[ "$TRAVIS_PULL_REQUEST" = "false" ] && mvn verify || true'
+  - TEST_CMD="/tmp/testrunner/bin/run -c ."

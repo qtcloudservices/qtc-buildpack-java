@@ -12,6 +12,8 @@ describe "Java" do
 
   before(:each) do
     set_java_version(app.directory, jdk_version)
+    app.setup!
+    app.heroku.put_stack(app.name, "cedar-14")
   end
 
   ["1.7", "1.8"].each do |version|
@@ -57,12 +59,12 @@ describe "Java" do
             expect(successful_body(app)).to eq("/1")
 
             expect(app.run("jce")).
-                to include("Picked up JAVA_TOOL_OPTIONS:  -Djava.rmi.server.useCodebaseOnly=true -Djava.rmi.server.useCodebaseOnly=true").
+                to include("Picked up JAVA_TOOL_OPTIONS: -Xmx384m  -Djava.rmi.server.useCodebaseOnly=true").
                 and include(%q{Encrypting, "Test"}).
-                and include(%q{Decrypted: Test}) unless jdk_version == "1.8"
+                and include(%q{Decrypted: Test})
 
             expect(app.run("netpatch")).
-                to include("Picked up JAVA_TOOL_OPTIONS:  -Djava.rmi.server.useCodebaseOnly=true -Djava.rmi.server.useCodebaseOnly=true").
+                to include("Picked up JAVA_TOOL_OPTIONS: -Xmx384m  -Djava.rmi.server.useCodebaseOnly=true").
                 and include(%q{name:eth0 (eth0)}).
                 and include(%q{name:lo (lo)})
 
