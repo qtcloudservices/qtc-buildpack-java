@@ -1,12 +1,32 @@
 #!/usr/bin/env bash
 
 . ${BUILDPACK_TEST_RUNNER_HOME}/lib/test_utils.sh
-. ${BUILDPACK_HOME}/bin/common
+. ${BUILDPACK_HOME}/lib/common.sh
 
 # Mocks
 
 download_maven() {
   echo "Not actually downloading maven..."
+}
+
+status() {
+  echo "$1..."
+}
+
+status_pending() {
+  echo -n "$1..."
+}
+
+status_done() {
+  echo " done"
+}
+
+error_return() {
+  echo "$1"
+}
+
+error() {
+  echo "$1"
 }
 
 # Helpers

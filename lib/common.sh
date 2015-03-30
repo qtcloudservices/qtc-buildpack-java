@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 
-DEFAULT_MAVEN_VERSION="3.2.3"
+DEFAULT_MAVEN_VERSION="3.3.1"
+
+export_env_dir() {
+  env_dir=$1
+  whitelist_regex=${2:-''}
+  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH|JAVA_OPTS)$'}
+  if [ -d "$env_dir" ]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
+  fi
+}
 
 install_maven() {
   local installDir=$1
@@ -12,15 +25,14 @@ install_maven() {
   if is_maven_needed ${mavenHome} ${definedMavenVersion}; then
     mavenVersion=${definedMavenVersion:-$DEFAULT_MAVEN_VERSION}
 
-    echo -n "-----> Installing Maven ${mavenVersion}..."
+    status_pending "Installing Maven ${mavenVersion}"
     if is_supported_maven_version ${mavenVersion}; then
       mavenUrl="http://lang-jvm.s3.amazonaws.com/maven-${mavenVersion}.tar.gz"
       download_maven ${mavenUrl} ${installDir} ${mavenHome}
-      echo " done"
+      status_done
     else
-      echo " failed"
-      echo " !      Error, you have defined an unsupported Maven version in the system.properties file."
-      echo " !      The list of known supported versions are 3.0.5, 3.1.1, and 3.2.3."
+      error_return "Error, you have defined an unsupported Maven version in the system.properties file.
+The list of known supported versions are 3.0.5, 3.1.1, 3.2.5 and 3.3.1."
       return 1
     fi
   fi
@@ -31,13 +43,17 @@ download_maven() {
   local installDir=$2
   local mavenHome=$3
   rm -rf $mavenHome
-  curl --silent --max-time 60 --location ${mavenUrl} | tar xz -C $installDir
+  curl --silent --max-time 60 --location ${mavenUrl} | tar xzm -C $installDir
   chmod +x $mavenHome/bin/mvn
 }
 
 is_supported_maven_version() {
   local mavenVersion=${1}
   if [ "$mavenVersion" = "$DEFAULT_MAVEN_VERSION" ]; then
+    return 0
+  elif [ "$mavenVersion" = "3.2.5" ]; then
+    return 0
+  elif [ "$mavenVersion" = "3.2.3" ]; then
     return 0
   elif [ "$mavenVersion" = "3.1.1" ]; then
     return 0
